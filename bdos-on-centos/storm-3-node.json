@@ -1,0 +1,40 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.1",
+    "parameters": {
+        "vnetID": {
+            "type": "string"
+        },
+        "resourceAPIVersion": {
+            "type": "object"
+        },
+        "dnsNamePrefix": {
+            "type": "string"
+        },
+        "scriptsUri": {
+            "type": "string"
+        },
+        "storageAccount": {
+            "type": "object"
+        },
+        "vmCount": {
+            "type": "int"
+        },
+        "vmSpec": {
+            "type": "secureObject"
+        },
+        "networkSpec": {
+            "type": "object"
+        }
+    },
+    "variables": {
+        "singleQuote":"'",
+        "masterIP": "[parameters('networkSpec').masterIP]",
+        "vmName": "[concat(parameters('dnsNamePrefix') , parameters('vmSpec').stormNodeVmNamePrefix)]",
+        "nicName": "[concat(variables('vmName'), 'nic-')]",
+        "storageAccountName": "[concat('sn',uniqueString(resourceGroup().id) , parameters('storageAccount').prefix)]"
+    },
+    "resources": [
+        
+    ]
+}

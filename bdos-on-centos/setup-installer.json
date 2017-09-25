@@ -1,0 +1,52 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.1",
+    "parameters": {
+       
+
+        "scriptsUri": {
+            "type": "string"
+        },
+        "vmSpec": {
+            "type": "object"
+        },
+        "networkSpec": {
+            "type": "object"
+        },
+        "managerAdminUserName": {
+            "type": "string"
+        },
+        "managerAdminPassword": {
+            "type": "securestring"
+        }
+
+
+    },
+    "variables": {
+        "singleQuote": "'"
+
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(parameters('vmSpec').masterNodeVmNamePrefix , '0' , '/prepareDisks')]",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.0",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "fileUris": [
+                        "[concat(parameters('scriptsUri'), '/bootstrap-ambari.sh')]",
+                        "[concat(parameters('scriptsUri'), '/mianmi.sh')]",
+                    ]
+                },
+                "protectedSettings": {
+                    "commandToExecute": "[concat('sh bootstrap-ambari.sh ' ,parameters('vmSpec').adminUserName , ' ', parameters('vmSpec').adminPassword ,' ', parameters('networkSpec').sshPort ,' ', parameters('vmSpec').masterNodeVmNamePrefix ,' ', 3 ,' ', parameters('vmSpec').dataNodeVmNamePrefix ,' ', parameters('vmSpec').numberOfDataNodes ,' ', parameters('vmSpec').runnerNodeVmNamePrefix ,' ',parameters('vmSpec').numberOfRunnerNodes ,' ',  parameters('vmSpec').webNodeVmNamePrefix ,' ',  1 ,' ', parameters('vmSpec').kafkaNodeVmNamePrefix ,' ', parameters('vmSpec').numberOfkafkaNodes ,' ', parameters('vmSpec').stormNodeVmNamePrefix ,' ', parameters('vmSpec').numberOfStormNodes ,' ', parameters('vmSpec').yumrepoNodeVmNamePrefix ,' ',  1 , ' >> /var/log/cloudera-azure-initialize.log 2>&1')]"
+                }
+            }
+        }
+    ]
+}

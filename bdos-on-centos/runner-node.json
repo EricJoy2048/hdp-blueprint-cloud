@@ -1,0 +1,182 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.1",
+    "parameters": {
+        "vnetID": {
+            "type": "string"
+        },
+        "resourceAPIVersion": {
+            "type": "object"
+        },
+        "dnsNamePrefix": {
+            "type": "string"
+        },
+        "scriptsUri": {
+            "type": "string"
+        },
+        "storageAccount": {
+            "type": "object"
+        },
+        "vmCount": {
+            "type": "int"
+        },
+        "vmSpec": {
+            "type": "secureObject"
+        },
+        "networkSpec": {
+            "type": "object"
+        }
+
+    },
+    "variables": {
+        "singleQuote":"'",
+        "masterIP": "[parameters('networkSpec').masterIP]",
+        "vmName": "[parameters('vmSpec').runnerNodeVmNamePrefix]",
+        "nicName": "[concat(variables('vmName'), 'nic-')]",
+        "yumNodeVm":"[concat(parameters('vmSpec').yumrepoNodeVmNamePrefix,'0')]",
+        "storageAccountName": "[concat('rn', uniqueString(resourceGroup().id) ,parameters('storageAccount').prefix)]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[concat(variables('storageAccountName') ,copyIndex() )]",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "copy": {
+                "name": "storageAccountLoop",
+                "count": "[parameters('vmCount')]"
+            },
+            "properties": {
+                "accountType": "[parameters('storageAccount').type]"
+            }
+        },
+        {
+            "apiVersion":"2015-06-15",
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat(variables('nicName'), copyIndex())]",
+            "location": "[resourceGroup().location]",
+            "copy": {
+                "name": "runnerNodeNicLoop",
+                "count": "[parameters('vmCount')]"
+            },
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Static",
+                            "privateIPAddress": "[concat(parameters('networkSpec').ipOctet01, add(parameters('networkSpec').ipOctet2, div(copyIndex(parameters('networkSpec').runnernodeIpOctet), 256)), '.', mod(copyIndex(parameters('networkSpec').runnernodeIpOctet), 256))]",
+                            "subnet": {
+                                "id": "[concat(parameters('vnetID'), '/subnets/', parameters('networkSpec').virtualNetworkSubnetName)]"
+                            }
+                        }
+                    }
+                ],
+                "networkSecurityGroup": {
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', concat(parameters('networkSpec').virtualNetworkName, '-sg'))]"
+                }
+            }
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[concat(variables('vmName'), copyIndex())]",
+            "location": "[resourceGroup().location]",
+            "copy": {
+                "name": "runnerNodeNicLoop",
+                "count": "[parameters('vmCount')]"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'), copyIndex())]",
+                "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName') , copyIndex())]"
+            ],
+            "properties": {
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('vmSpec').runnerNodeASName)]"
+                },
+                "hardwareProfile": {
+                    "vmSize": "[parameters('vmSpec').runnerVmSize]"
+                },
+                "osProfile": {
+                    "computerName": "[concat(variables('vmName'), copyIndex())]",
+                    "adminUsername": "[parameters('vmSpec').adminUserName]",
+                    "adminPassword": "[parameters('vmSpec').adminPassword]",
+                    "linuxConfiguration": {
+                        "disablePasswordAuthentication": false
+                    }
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "OpenLogic",
+                        "offer": "CentOS",
+                        "sku": "6.5",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "osdisk",
+                        "vhd": {
+                            "uri": "[concat('https', '://', variables('storageAccountName'), copyIndex(), '.blob.core.chinacloudapi.cn', '/vhds/' , variables('vmName'), '.vhd')]"
+                        },
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    },
+                    "dataDisks": [
+                        {
+                            "name": "datadisk0",
+                            "diskSizeGB": "512",
+                            "lun": 0,
+                            "vhd": {
+                                "uri": "[concat('https', '://', variables('storageAccountName'), copyIndex(), '.blob.core.chinacloudapi.cn', '/vhds/' , variables('vmName'), '-datadisk0.vhd')]"
+                            },
+                            "createOption": "Empty"
+                        },
+                        {
+                            "name": "datadisk1",
+                            "diskSizeGB": "1023",
+                            "lun": 1,
+                            "vhd": {
+                                "uri": "[concat('https', '://', variables('storageAccountName'), copyIndex(), '.blob.core.chinacloudapi.cn', '/vhds/' , variables('vmName'), '-datadisk1.vhd')]"
+                            },
+                            "createOption": "Empty"
+                        }
+                    ]
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('nicName'), copyIndex()))]"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(variables('vmName'), copyIndex(), '/prepareDisks')]",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "copy": {
+                "name": "runnerNodeNicLoop",
+                "count": "[parameters('vmCount')]"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'), copyIndex())]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.0",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "fileUris": [
+                        "[concat(parameters('scriptsUri'), '/prepare-runnernode-disks.sh')]",
+                        "[concat(parameters('scriptsUri'), '/initialize-node.sh')]",
+                        "[concat(parameters('scriptsUri'), '/ambari.repo')]",
+                        "[concat(parameters('scriptsUri'), '/init-ambari-server.sh')]"
+                    ],
+                    "commandToExecute": "[concat('sh initialize-node.sh ', variables('singleQuote') , variables('masterIP') , variables('singleQuote') , ' ' , variables('singleQuote') , parameters('vmSpec').adminUserName , variables('singleQuote') ,  ' ' , variables('singleQuote') ,'runnernode' , variables('singleQuote') ,  ' ' , copyIndex() , ' ' , variables('singleQuote') , parameters('vmSpec').adminUserName ,  variables('singleQuote')  , ' ' , variables('singleQuote') ,parameters('vmSpec').ambariMysqlRootPassword , variables('singleQuote') , ' ' , parameters('networkSpec').sshPort ,  ' ' , variables('yumNodeVm') ,   ' >> /var/log/bdos-azure-initialize.log 2>&1')]"
+                }
+            }
+        }
+    ]
+}

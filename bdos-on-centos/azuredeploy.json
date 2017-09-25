@@ -1,0 +1,831 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+    "contentVersion": "1.0.0.1",
+    "parameters": {
+        "adminUserName": {
+            "type": "string",
+            "defaultValue": "bdosadmin",
+            "allowedValues": [
+                "bdosadmin"
+            ],
+            "metadata": {
+                "description": "虚拟机VM的管理员用户名"
+            }
+        },
+        "adminPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "虚拟机VM的管理员用户密码"
+            }
+        },
+        "ambariMysqlRootPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "BD-OS installer ambari所使用的mysql数据库的root用户的密码"
+            }
+        },
+        "managerAdminUserName": {
+            "type": "string",
+            "defaultValue": "admin",
+            "allowedValues": [
+                "admin"
+            ],
+            "metadata": {
+                "description": "BD-OS installer (ambari)的登陆用户名"
+            }
+        },
+        "managerAdminPassword": {
+            "type": "string",
+            "defaultValue": "admin",
+            "allowedValues": [
+                "admin"
+            ],
+            "metadata": {
+                "description": "BD-OS installer (ambari)的登陆密码，请安装完成后立即进行修改！"
+            }
+        },
+        "storageAccountPrefix": {
+            "type": "string",
+            "defaultValue": "storage",
+            "metadata": {
+                "description": "存储帐号前缀"
+            }
+        },
+        "dnsNamePrefix": {
+            "type": "string",
+            "defaultValue": "dns",
+            "metadata": {
+                "description": "dns前缀"
+            }
+        },
+        "masterStorageAccountType": {
+            "type": "string",
+            "defaultValue": "Standard_LRS",
+            "metadata": {
+                "description": "master节点存储帐号类型"
+            }
+        },
+        "workerStorageAccountType": {
+            "type": "string",
+            "defaultValue": "Standard_LRS",
+            "metadata": {
+                "description": "其它工作节点的存储帐号类型"
+            }
+        },
+        "virtualNetworkName": {
+            "type": "string",
+            "defaultValue": "bdosvnet",
+            "metadata": {
+                "description": "虚拟网络名称"
+            }
+        },
+        "vnetNewOrExisting": {
+            "type": "string",
+            "defaultValue": "new",
+            "allowedValues": [
+                "new"
+            ],
+            "metadata": {
+                "description": "是否是已经存在的网络"
+            }
+        },
+        "virtualNetworkRGName": {
+            "type": "string",
+            "defaultValue": "vnetgroup",
+            "metadata": {
+                "description": "虚拟网络组名"
+            }
+        },
+        "subnetName": {
+            "type": "string",
+            "defaultValue": "bdossubnet",
+            "metadata": {
+                "description": "虚拟网络子网名称"
+            }
+        },
+        "sshPort": {
+            "type": "int",
+            "defaultValue": "22",
+            "metadata": {
+                "description": "集群ssh端口"
+            }
+        },
+        "addressPrefix": {
+            "type": "string",
+            "defaultValue": "10.3.0.0/16",
+            "metadata": {
+                "description": "虚拟网络ip段"
+            }
+        },
+        "subnetPrefix": {
+            "type": "string",
+            "defaultValue": "10.3.0.0/16",
+            "metadata": {
+                "description": "子网ip段"
+            }
+        },
+        "masterNodeIPAddress": {
+            "type": "string",
+            "defaultValue": "10.3.0.4",
+            "metadata": {
+                "description": "master节点的第一个节点的ip，之后所有的ip通过该ip+n计算得出，n代表一个计算规则，这里不详细说明"
+            }
+        },
+        "dataNodeIPOffSetFromMaster": {
+            "type": "int",
+            "defaultValue": 10,
+            "metadata": {
+                "description": "第一个datanode的开始ip, 比如第一个master节点的ip是 10.1.1.1, 那么第一个datanode节点的ip是 10.1.1.11"
+            }
+        },
+        "masterVmSize": {
+            "type": "string",
+            "defaultValue": "Standard_A3",
+            "allowedValues": [
+                "Standard_A3",
+                "Standard_A4",
+                "Standard_A5",
+                "Standard_A6",
+                "Standard_A7",
+                "Standard_DS3",
+                "Standard_DS4",
+                "Standard_DS11",
+                "Standard_DS12",
+                "Standard_DS13",
+                "Standard_DS14",
+                "Standard_DS3_v2",
+                "Standard_DS4_v2",
+                "Standard_DS11_v2",
+                "Standard_DS12_v2",
+                "Standard_DS13_v2",
+                "Standard_DS14_v2"
+            ],
+            "metadata": {
+                "description": "master节点的机器类型"
+            }
+        },
+        "numberOfDataNodes": {
+            "type": "int",
+            "defaultValue": 3,
+            "minValue": 3,
+            "metadata": {
+                "description": "datanode节点的个数，该节点会部署datanode,nodemanager,regionserver,khan的segment节点，默认是3个"
+            }
+        },
+        "datanodeVmSize": {
+            "type": "string",
+            "defaultValue": "Standard_A3",
+            "allowedValues": [
+                "Standard_A3",
+                "Standard_A4",
+                "Standard_A5",
+                "Standard_A6",
+                "Standard_A7",
+                "Standard_DS3",
+                "Standard_DS4",
+                "Standard_DS11",
+                "Standard_DS12",
+                "Standard_DS13",
+                "Standard_DS14",
+                "Standard_DS3_v2",
+                "Standard_DS4_v2",
+                "Standard_DS11_v2",
+                "Standard_DS12_v2",
+                "Standard_DS13_v2",
+                "Standard_DS14_v2"
+            ],
+            "metadata": {
+                "description": "datanode节点的机器类型"
+            }
+        },
+        "webVmSize": {
+            "type": "string",
+            "defaultValue": "Standard_A2",
+            "allowedValues": [
+                "Standard_A2",
+                "Standard_A3",
+                "Standard_A4",
+                "Standard_A5",
+                "Standard_A6",
+                "Standard_A7",
+                "Standard_DS3",
+                "Standard_DS4",
+                "Standard_DS11",
+                "Standard_DS12",
+                "Standard_DS13",
+                "Standard_DS14",
+                "Standard_DS3_v2",
+                "Standard_DS4_v2",
+                "Standard_DS11_v2",
+                "Standard_DS12_v2",
+                "Standard_DS13_v2",
+                "Standard_DS14_v2"
+            ],
+            "metadata": {
+                "description": "web节点的机器类型，上面会部署所有BD-OS的web服务"
+            }
+        },
+        "numberOfkafkaNodes": {
+            "type": "int",
+            "defaultValue": 1,
+            "minValue": 0,
+            "metadata": {
+                "description": "kafka节点的个数，上面会部署kafka服务"
+            }
+        },
+        "kafkaVmSize": {
+            "type": "string",
+            "defaultValue": "Standard_A2",
+            "allowedValues": [
+                "Standard_A2",
+                "Standard_A3",
+                "Standard_A4",
+                "Standard_A5",
+                "Standard_A6",
+                "Standard_A7",
+                "Standard_DS3",
+                "Standard_DS4",
+                "Standard_DS11",
+                "Standard_DS12",
+                "Standard_DS13",
+                "Standard_DS14",
+                "Standard_DS3_v2",
+                "Standard_DS4_v2",
+                "Standard_DS11_v2",
+                "Standard_DS12_v2",
+                "Standard_DS13_v2",
+                "Standard_DS14_v2"
+            ],
+            "metadata": {
+                "description": "kafka节点的机器类型"
+            }
+        },
+        "numberOfStormNodes": {
+            "type": "int",
+            "defaultValue": 1,
+            "minValue": 0,
+            "metadata": {
+                "description": "storm节点的个数，上面会部署storm的supveros，storm的master服务部署在master节点上"
+            }
+        },
+        "stormVmSize": {
+            "type": "string",
+            "defaultValue": "Standard_A2",
+            "allowedValues": [
+                "Standard_A2",
+                "Standard_A3",
+                "Standard_A4",
+                "Standard_A5",
+                "Standard_A6",
+                "Standard_A7",
+                "Standard_DS3",
+                "Standard_DS4",
+                "Standard_DS11",
+                "Standard_DS12",
+                "Standard_DS13",
+                "Standard_DS14",
+                "Standard_DS3_v2",
+                "Standard_DS4_v2",
+                "Standard_DS11_v2",
+                "Standard_DS12_v2",
+                "Standard_DS13_v2",
+                "Standard_DS14_v2"
+            ],
+            "metadata": {
+                "description": "storm节点的机器类型"
+            }
+        },
+        "numberOfRunnerNodes": {
+            "type": "int",
+            "defaultValue": 1,
+            "minValue": 1,
+            "metadata": {
+                "description": "runner节点的个数，runner节点是集群的客户端节点，上面会部署所有服务的client，BD-OS所有作业的提交都是在这个节点提交"
+            }
+        },
+        "runnerVmSize": {
+            "type": "string",
+            "defaultValue": "Standard_A2",
+            "allowedValues": [
+                "Standard_A2",
+                "Standard_A3",
+                "Standard_A4",
+                "Standard_A5",
+                "Standard_A6",
+                "Standard_A7",
+                "Standard_DS3",
+                "Standard_DS4",
+                "Standard_DS11",
+                "Standard_DS12",
+                "Standard_DS13",
+                "Standard_DS14",
+                "Standard_DS3_v2",
+                "Standard_DS4_v2",
+                "Standard_DS11_v2",
+                "Standard_DS12_v2",
+                "Standard_DS13_v2",
+                "Standard_DS14_v2"
+            ],
+            "metadata": {
+                "description": "runner节点的机器类型"
+            }
+        },
+        "yumrepoVmSize": {
+            "type": "string",
+            "defaultValue": "Standard_A2",
+            "allowedValues": [
+                "Standard_A2",
+                "Standard_A3"
+            ],
+            "metadata": {
+                "description": "yum源的机器类型，该机器上包括了所有bd-os以及centos使用的yum源，系统安装完成后可以关机，下次安装服务时开机即可。但不要删除，删除后系统因为yum丢失，无法再安装任何服务，无法扩容，无法做节点的迁移等操作。"
+            }
+        },
+        "vmImage": {
+            "type": "string",
+            "defaultValue": "BdosCentOS6",
+            "metadata": {
+                "description": "The OS VM Image (defaults to BdosCentOS6)"
+            },
+            "allowedValues": [
+                "BdosCentOS6"
+            ]
+        }
+    },
+    "variables": {
+        "resourceAPIVersion": {
+            "templateAPIVersion": "2015-01-01",
+            "apiVersionStorage": "2016-01-01",
+            "apiVersionNetwork": "2016-03-30",
+            "apiVersionCompute": "2015-06-15"
+        },
+        "vmImageInfo": {
+            "BdosCentOS6": {
+                "plan": {
+                    "name": "bdos-centos-6",
+                    "publisher": "bfd",
+                    "product": "bdos-centos-6"
+                },
+                "imageReference": {
+                    "publisher": "bfd",
+                    "offer": "bdos-centos-6",
+                    "sku": "bdos-centos-6",
+                    "version": "latest"
+                }
+            }
+        },
+        "hiveStorm": "[length(split(concat('0',string(parameters('numberOfStormNodes'))) , string(parameters('numberOfStormNodes'))))]",
+        "hiveKafka": "[length(split(concat('0',string(parameters('numberOfkafkaNodes'))) , string(parameters('numberOfkafkaNodes'))))]",
+        "addressPrefix": "[parameters('addressPrefix')]",
+        "subnetPrefix": "[parameters('subnetPrefix')]",
+        "project-dir": "http://tdms.xianzhishuo.com/pages/bdos-on-centos",
+        "scriptsUri": "[concat(variables('project-dir') , '/scripts')]",
+        "share-resourcesUri": "[concat(variables('project-dir'), '/shared-resources-', parameters('vnetNewOrExisting'), '-vnet.json')]",
+        "data-nodeUri": "[concat(variables('project-dir'), '/data-node.json')]",
+        "master-nodeUri": "[concat(variables('project-dir'), '/master-node.json')]",
+        "web-nodeUri": "[concat(variables('project-dir'), '/web-node.json')]",
+        "kafka-nodeUri": "[concat(variables('project-dir'), '/kafka-' ,string(variables('hiveKafka')) , '-node.json')]",
+        "storm-nodeUri": "[concat(variables('project-dir'), '/storm-' ,string(variables('hiveStorm')) , '-node.json')]",
+        "runner-nodeUri": "[concat(variables('project-dir'), '/runner-node.json')]",
+        "yumrepo-nodeUri": "[concat(variables('project-dir'), '/yumrepo-node.json')]",
+        "sa": "[parameters('masterNodeIPAddress')]",
+        "ipOctet01": "[concat(split(variables('sa'), '.')[0], '.', split(variables('sa'), '.')[1], '.')]",
+        "ipOctet2": "[int(split(variables('sa'), '.')[2])]",
+        "ipOctet3": "[int(split(variables('sa'), '.')[3])]",
+        "datanodeIpOctet3": "[int(add(int(split(variables('sa'), '.')[3]), parameters('dataNodeIPOffSetFromMaster')))]",
+        "kafkanodeIpOctet": "[int(add(variables('datanodeIpOctet3') , parameters('numberOfDataNodes')))]",
+        "stormnodeIpOctet": "[int(add(variables('kafkanodeIpOctet') , parameters('numberOfkafkaNodes')))]",
+        "runnernodeIpOctet": "[int(add(variables('stormnodeIpOctet') , parameters('numberOfStormNodes')))]",
+        "webnodeIpOctet": "[int(add(variables('runnernodeIpOctet') , parameters('numberOfRunnerNodes')))]",
+        "yumreponodeIpOctet": "[int(add(variables('webnodeIpOctet') , 1))]",
+        "clusterVmNamePrefix": "[toLower(uniqueString(resourceGroup().id))]",
+        "masterStorageAccount": {
+            "prefix": "[parameters('storageAccountPrefix')]",
+            "type": "[parameters('masterStorageAccountType')]"
+        },
+        "workerStorageAccount": {
+            "prefix": "[parameters('storageAccountPrefix')]",
+            "type": "[parameters('workerStorageAccountType')]"
+        },
+        "vmSpec": {
+            "numberOfMasterNodes": 3,
+            "imageInfo": "[variables('vmImageInfo')[parameters('vmImage')]]",
+            "masterVmSize": "[parameters('masterVmSize')]",
+            "numberOfDataNodes": "[parameters('numberOfDataNodes')]",
+            "datanodeVmSize": "[parameters('datanodeVmSize')]",
+            "webVmSize": "[parameters('webVmSize')]",
+            "numberOfkafkaNodes": "[parameters('numberOfkafkaNodes')]",
+            "numberOfStormNodes": "[parameters('numberOfStormNodes')]",
+            "kafkaVmSize": "[parameters('kafkaVmSize')]",
+            "stormVmSize": "[parameters('stormVmSize')]",
+            "numberOfRunnerNodes": "[parameters('numberOfRunnerNodes')]",
+            "runnerVmSize": "[parameters('runnerVmSize')]",
+            "adminUserName": "[parameters('adminUserName')]",
+            "adminPassword": "[parameters('adminPassword')]",
+            "ambariMysqlRootPassword": "[parameters('ambariMysqlRootPassword')]",
+            "masterNodeVmNamePrefix": "[concat(parameters('dnsNamePrefix') , '-' , variables('clusterVmNamePrefix') , '-cluster-master-')]",
+            "dataNodeVmNamePrefix": "[concat(parameters('dnsNamePrefix') , '-' ,variables('clusterVmNamePrefix') , '-cluster-slave-')]",
+            "webNodeVmNamePrefix": "[concat(parameters('dnsNamePrefix') , '-' ,variables('clusterVmNamePrefix') , '-bdos-web')]",
+            "kafkaNodeVmNamePrefix": "[concat(parameters('dnsNamePrefix') , '-' ,variables('clusterVmNamePrefix') , '-bdos-cluster-kafka-')]",
+            "stormNodeVmNamePrefix": "[concat(parameters('dnsNamePrefix') , '-' ,variables('clusterVmNamePrefix') , '-bdos-cluster-storm-')]",
+            "runnerNodeVmNamePrefix": "[concat(parameters('dnsNamePrefix') , '-' ,variables('clusterVmNamePrefix') , '-bdos-runner-')]",
+            "masterNodeASName": "[concat(parameters('dnsNamePrefix'), '-masterNodeAS')]",
+            "dataNodeASName": "[concat(parameters('dnsNamePrefix'), '-dataNodeAS')]",
+            "webNodeASName": "[concat(parameters('dnsNamePrefix'), '-webNodeAS')]",
+            "kafkaNodeASName": "[concat(parameters('dnsNamePrefix'), '-kafkaNodeAS')]",
+            "stormNodeASName": "[concat(parameters('dnsNamePrefix'), '-stormNodeAS')]",
+            "runnerNodeASName": "[concat(parameters('dnsNamePrefix'), '-runnerNodeAS')]",
+            "yumrepoVmSize": "[parameters('yumrepoVmSize')]",
+            "yumrepoNodeASName": "[concat(parameters('dnsNamePrefix'), '-yumrepoNodeAS')]",
+            "yumrepoNodeVmNamePrefix": "[concat(parameters('dnsNamePrefix') , '-' ,variables('clusterVmNamePrefix') , '-bdos-yumrepo')]"
+        },
+        "networkSpec": {
+            "addressPrefix": "[variables('addressPrefix')]",
+            "subnetPrefix": "[variables('subnetPrefix')]",
+            "sshPort": "[parameters('sshPort')]",
+            "ipOctet01": "[variables('ipOctet01')]",
+            "ipOctet2": "[variables('ipOctet2')]",
+            "ipOctet3": "[variables('ipOctet3')]",
+            "datanodeIpOctet3": "[variables('datanodeIpOctet3')]",
+            "kafkanodeIpOctet": "[variables('kafkanodeIpOctet')]",
+            "stormnodeIpOctet": "[variables('stormnodeIpOctet')]",
+            "runnernodeIpOctet": "[variables('runnernodeIpOctet')]",
+            "webnodeIpOctet": "[variables('webnodeIpOctet')]",
+            "yumreponodeIpOctet": "[variables('yumreponodeIpOctet')]",
+            "masterIP": "[variables('sa')]",
+            "workerIP": "[concat(variables('ipOctet01'), add(variables('ipOctet2'), div(variables('datanodeIpOctet3'), 255)), '.', mod(variables('datanodeIpOctet3'), 255))]",
+            "virtualNetworkName": "[parameters('virtualNetworkName')]",
+            "virtualNetworkRGName": "[parameters('virtualNetworkRGName')]",
+            "vnetNewOrExisting": "[parameters('vnetNewOrExisting')]",
+            "virtualNetworkSubnetName": "[parameters('subnetName')]"
+        },
+        "newVNetId": "[resourceId(concat('Microsoft.Network','/','virtualNetworks'),parameters('virtualNetworkName'))]",
+        "existingVNetId": "[resourceId(parameters('virtualNetworkRGName'),concat('Microsoft.Network','/','virtualNetworks'),parameters('virtualNetworkName'))]",
+        "VNetId": "[variables(concat(parameters('vnetNewOrExisting'),'VNetId'))]"
+    },
+    "resources": [
+        {
+            "name": "shared-resources",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2015-01-01",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('share-resourcesUri')]",
+                    "contentVersion": "1.0.0.1"
+                },
+                "parameters": {
+                    "networkSpec": {
+                        "value": "[variables('networkSpec')]"
+                    },
+                    "masterNodeASName": {
+                        "value": "[variables('vmSpec').masterNodeASName]"
+                    },
+                    "dataNodeASName": {
+                        "value": "[variables('vmSpec').dataNodeASName]"
+                    },
+                    "webNodeASName": {
+                        "value": "[variables('vmSpec').webNodeASName]"
+                    },
+                    "kafkaNodeASName": {
+                        "value": "[variables('vmSpec').kafkaNodeASName]"
+                    },
+                    "stormNodeASName": {
+                        "value": "[variables('vmSpec').stormNodeASName]"
+                    },
+                    "runnerNodeASName": {
+                        "value": "[variables('vmSpec').runnerNodeASName]"
+                    },
+                    "yumrepoNodeASName": {
+                        "value": "[variables('vmSpec').yumrepoNodeASName]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "master-node",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2015-01-01",
+            "dependsOn": [
+                "Microsoft.Resources/deployments/shared-resources"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('master-nodeUri')]",
+                    "contentVersion": "1.0.0.1"
+                },
+                "parameters": {
+                    "vnetID": {
+                        "value": "[variables('VNetId')]"
+                    },
+                    "resourceAPIVersion": {
+                        "value": "[variables('resourceAPIVersion')]"
+                    },
+                    "dnsNamePrefix": {
+                        "value": "[parameters('dnsNamePrefix')]"
+                    },
+                    "scriptsUri": {
+                        "value": "[variables('scriptsUri')]"
+                    },
+                    "storageAccount": {
+                        "value": "[variables('masterStorageAccount')]"
+                    },
+                    "vmCount": {
+                        "value": "[variables('vmSpec').numberOfMasterNodes]"
+                    },
+                    "vmSpec": {
+                        "value": "[variables('vmSpec')]"
+                    },
+                    "networkSpec": {
+                        "value": "[variables('networkSpec')]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "data-node",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2015-01-01",
+            "dependsOn": [
+                "Microsoft.Resources/deployments/shared-resources"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('data-nodeUri')]",
+                    "contentVersion": "1.0.0.1"
+                },
+                "parameters": {
+                    "vnetID": {
+                        "value": "[variables('VNetId')]"
+                    },
+                    "resourceAPIVersion": {
+                        "value": "[variables('resourceAPIVersion')]"
+                    },
+                    "dnsNamePrefix": {
+                        "value": "[parameters('dnsNamePrefix')]"
+                    },
+                    "scriptsUri": {
+                        "value": "[variables('scriptsUri')]"
+                    },
+                    "storageAccount": {
+                        "value": "[variables('workerStorageAccount')]"
+                    },
+                    "vmCount": {
+                        "value": "[variables('vmSpec').numberOfDataNodes]"
+                    },
+                    "vmSpec": {
+                        "value": "[variables('vmSpec')]"
+                    },
+                    "networkSpec": {
+                        "value": "[variables('networkSpec')]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "web-node",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2015-01-01",
+            "dependsOn": [
+                "Microsoft.Resources/deployments/shared-resources"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('web-nodeUri')]",
+                    "contentVersion": "1.0.0.1"
+                },
+                "parameters": {
+                    "vnetID": {
+                        "value": "[variables('VNetId')]"
+                    },
+                    "resourceAPIVersion": {
+                        "value": "[variables('resourceAPIVersion')]"
+                    },
+                    "dnsNamePrefix": {
+                        "value": "[parameters('dnsNamePrefix')]"
+                    },
+                    "scriptsUri": {
+                        "value": "[variables('scriptsUri')]"
+                    },
+                    "storageAccount": {
+                        "value": "[variables('workerStorageAccount')]"
+                    },
+                    "vmCount": {
+                        "value": 1
+                    },
+                    "vmSpec": {
+                        "value": "[variables('vmSpec')]"
+                    },
+                    "networkSpec": {
+                        "value": "[variables('networkSpec')]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "kafka-node",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2015-01-01",
+            "dependsOn": [
+                "Microsoft.Resources/deployments/shared-resources"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('kafka-nodeUri')]",
+                    "contentVersion": "1.0.0.1"
+                },
+                "parameters": {
+                    "vnetID": {
+                        "value": "[variables('VNetId')]"
+                    },
+                    "resourceAPIVersion": {
+                        "value": "[variables('resourceAPIVersion')]"
+                    },
+                    "dnsNamePrefix": {
+                        "value": "[parameters('dnsNamePrefix')]"
+                    },
+                    "scriptsUri": {
+                        "value": "[variables('scriptsUri')]"
+                    },
+                    "storageAccount": {
+                        "value": "[variables('workerStorageAccount')]"
+                    },
+                    "vmCount": {
+                        "value": "[variables('vmSpec').numberOfkafkaNodes]"
+                    },
+                    "vmSpec": {
+                        "value": "[variables('vmSpec')]"
+                    },
+                    "networkSpec": {
+                        "value": "[variables('networkSpec')]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "storm-node",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2015-01-01",
+            "dependsOn": [
+                "Microsoft.Resources/deployments/shared-resources"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('storm-nodeUri')]",
+                    "contentVersion": "1.0.0.1"
+                },
+                "parameters": {
+                    "vnetID": {
+                        "value": "[variables('VNetId')]"
+                    },
+                    "resourceAPIVersion": {
+                        "value": "[variables('resourceAPIVersion')]"
+                    },
+                    "dnsNamePrefix": {
+                        "value": "[parameters('dnsNamePrefix')]"
+                    },
+                    "scriptsUri": {
+                        "value": "[variables('scriptsUri')]"
+                    },
+                    "storageAccount": {
+                        "value": "[variables('workerStorageAccount')]"
+                    },
+                    "vmCount": {
+                        "value": "[variables('vmSpec').numberOfStormNodes]"
+                    },
+                    "vmSpec": {
+                        "value": "[variables('vmSpec')]"
+                    },
+                    "networkSpec": {
+                        "value": "[variables('networkSpec')]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "runner-node",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2015-01-01",
+            "dependsOn": [
+                "Microsoft.Resources/deployments/shared-resources"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('runner-nodeUri')]",
+                    "contentVersion": "1.0.0.1"
+                },
+                "parameters": {
+                    "vnetID": {
+                        "value": "[variables('VNetId')]"
+                    },
+                    "resourceAPIVersion": {
+                        "value": "[variables('resourceAPIVersion')]"
+                    },
+                    "dnsNamePrefix": {
+                        "value": "[parameters('dnsNamePrefix')]"
+                    },
+                    "scriptsUri": {
+                        "value": "[variables('scriptsUri')]"
+                    },
+                    "storageAccount": {
+                        "value": "[variables('workerStorageAccount')]"
+                    },
+                    "vmCount": {
+                        "value": "[variables('vmSpec').numberOfRunnerNodes]"
+                    },
+                    "vmSpec": {
+                        "value": "[variables('vmSpec')]"
+                    },
+                    "networkSpec": {
+                        "value": "[variables('networkSpec')]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "yumrepo-node",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2015-01-01",
+            "dependsOn": [
+                "Microsoft.Resources/deployments/shared-resources"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('yumrepo-nodeUri')]",
+                    "contentVersion": "1.0.0.1"
+                },
+                "parameters": {
+                    "vnetID": {
+                        "value": "[variables('VNetId')]"
+                    },
+                    "resourceAPIVersion": {
+                        "value": "[variables('resourceAPIVersion')]"
+                    },
+                    "dnsNamePrefix": {
+                        "value": "[parameters('dnsNamePrefix')]"
+                    },
+                    "scriptsUri": {
+                        "value": "[variables('scriptsUri')]"
+                    },
+                    "storageAccount": {
+                        "value": "[variables('workerStorageAccount')]"
+                    },
+                    "vmCount": {
+                        "value": 1
+                    },
+                    "vmSpec": {
+                        "value": "[variables('vmSpec')]"
+                    },
+                    "networkSpec": {
+                        "value": "[variables('networkSpec')]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "setup-installer",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2015-01-01",
+            "dependsOn": [
+                "Microsoft.Resources/deployments/master-node",
+                "Microsoft.Resources/deployments/data-node",
+                "Microsoft.Resources/deployments/kafka-node",
+                "Microsoft.Resources/deployments/storm-node",
+                "Microsoft.Resources/deployments/web-node",
+                "Microsoft.Resources/deployments/runner-node",
+                "Microsoft.Resources/deployments/yumrepo-node"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(variables('project-dir'), '/setup-installer.json')]",
+                    "contentVersion": "1.0.0.1"
+                },
+                "parameters": {
+                    "scriptsUri": {
+                        "value": "[variables('scriptsUri')]"
+                    },
+                    "vmSpec": {
+                        "value": "[variables('vmSpec')]"
+                    },
+                    "networkSpec": {
+                        "value": "[variables('networkSpec')]"
+                    },
+                    "managerAdminUserName": {
+                        "value": "[parameters('managerAdminUserName')]"
+                    },
+                    "managerAdminPassword": {
+                        "value": "[parameters('managerAdminPassword')]"
+                    }
+                }
+            }
+        }
+    ]
+}
