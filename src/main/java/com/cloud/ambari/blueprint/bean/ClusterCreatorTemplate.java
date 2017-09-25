@@ -1,4 +1,4 @@
-package com.bfd.bdos.bdos.cloud.ambari.blueprint.bean;
+package com.cloud.ambari.blueprint.bean;
 
 import java.util.List;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package com.bfd.bdos.bdos.cloud.ambari.blueprint;
+package com.cloud.ambari.blueprint;
 
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -12,11 +12,11 @@ import org.sty.sadt.core.util.DataFormatTool;
 import org.sty.sadt.core.util.FileTool;
 import org.sty.sadt.core.util.HttpClientTools;
 
-import com.bfd.bdos.bdos.cloud.ambari.blueprint.bean.ClusterCreatorTemplate;
-import com.bfd.bdos.bdos.cloud.ambari.blueprint.bean.HostFqdn;
-import com.bfd.bdos.bdos.cloud.ambari.blueprint.bean.HostGroup;
-import com.bfd.bdos.bdos.cloud.ambari.blueprint.bean.MonitorProgress;
-import com.bfd.bdos.bdos.cloud.ambari.blueprint.bean.Repository;
+import com.cloud.ambari.blueprint.bean.ClusterCreatorTemplate;
+import com.cloud.ambari.blueprint.bean.HostFqdn;
+import com.cloud.ambari.blueprint.bean.HostGroup;
+import com.cloud.ambari.blueprint.bean.MonitorProgress;
+import com.cloud.ambari.blueprint.bean.Repository;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -29,10 +29,10 @@ import net.sf.json.JSONObject;
  */
 public class CreateCluster {
 
-	//bdos-web ip或主机名
-	private static String bdos_web_host = "bdos-web";
+	//xxx-web ip或主机名
+	private static String xxx_web_host = "xxx-web";
 
-	private static ArrayList<String> bdos_runner_hosts = new ArrayList<String>();
+	private static ArrayList<String> xxx_runner_hosts = new ArrayList<String>();
 	private static ArrayList<String> kafka_hosts = new ArrayList<String>();
 	private static ArrayList<String> storm_hosts = new ArrayList<String>();
 
@@ -40,9 +40,9 @@ public class CreateCluster {
 		args = new String[8];
 		//BD-OS版本
 		//此处根据用户是否需要安装storm选择不同的版本
-		//需要storm则改为"bdos1.3.1-hdp2.4.2-withStorm"
-		//不需要storm则改为"bdos1.3.1-hdp2.4.2-withoutStorm"
-		args[0] = "bdos1.3.1-hdp2.4.2-withstorm";
+		//需要storm则改为"xxx1.3.1-hdp2.4.2-withStorm"
+		//不需要storm则改为"xxx1.3.1-hdp2.4.2-withoutStorm"
+		args[0] = "xxx1.3.1-hdp2.4.2-withstorm";
 		//集群名称
 		args[1] = "mycluster";
 		//ambari的地址
@@ -52,7 +52,7 @@ public class CreateCluster {
 		args[3] = "http://172.24.5.242:9381";
 
 		//主机列表 cluster-storm-1
-		args[4] = "bdos-runner-1,bdos-web,cluster-master-1,"
+		args[4] = "xxx-runner-1,xxx-web,cluster-master-1,"
 				+ "cluster-master-2,cluster-master-3,"
 				+ "cluster-slave-1,cluster-slave-2,cluster-slave-3,"
 				+ "cluster-storm-1,cluster-storm-2";
@@ -60,9 +60,9 @@ public class CreateCluster {
 		//				+ "bgs-5p246-gaojun,bgs-5p247-gaojun,bgs-5p248-gaojun,bgs-5p249-gaojun,"
 		//				+ "bgs-5p250-gaojun,bgs-5p251-gaojun";
 		//		
-		args[5] = "E:/workspaceScala/bdos-blueprint-cloud/src/main/resources/repository.json.example";
+		args[5] = "E:/workspaceScala/xxx-blueprint-cloud/src/main/resources/repository.json.example";
 
-		args[6] = "bdos1qaz@WSX";
+		args[6] = "xxx1qaz@WSX";
 
 		//hawq ssh端口号
 		args[7] = "3222";
@@ -70,7 +70,7 @@ public class CreateCluster {
 
 
 		//BD-OS版本
-		String bdosVersion = args[0];
+		String xxxVersion = args[0];
 		//集群名称
 		String clusteName = args[1];
 		//ambari的地址
@@ -86,7 +86,7 @@ public class CreateCluster {
 		//hawq ssh的端口号
 		String hawq_ssh_port = args[7];
 
-		BluePrintBuild bpb = new BluePrintBuild( bdosVersion
+		BluePrintBuild bpb = new BluePrintBuild( xxxVersion
 				, ambariServerAddress 
 				, clusteName 
 				, repoAddress 
@@ -145,24 +145,24 @@ public class CreateCluster {
 		if(cc.initMysql(bpb))
 			System.out.println("init mysql 成功！,重启BD-OS服务");
 		else{
-			System.out.println("mysql init 失败，部署完成后需要您手动在ambari中执行mysql init 操作。mysql init操作完成后，请手动重启bdos-web机器上的所有服务。！");
+			System.out.println("mysql init 失败，部署完成后需要您手动在ambari中执行mysql init 操作。mysql init操作完成后，请手动重启xxx-web机器上的所有服务。！");
 			return;
 		}
-		//8.重启BDOS集群
-		System.out.println("restart bdos-web ......");
-		if(cc.restartBdosServers(bpb))
-			System.out.println("restart bdos-web 成功！,重启bdos-runner");
+		//8.重启xxx集群
+		System.out.println("restart xxx-web ......");
+		if(cc.restartxxxServers(bpb))
+			System.out.println("restart xxx-web 成功！,重启xxx-runner");
 		else{
-			System.out.println("restart bdos-web 失败，请在ambari中将BDOS服务依次执行restart操作");
+			System.out.println("restart xxx-web 失败，请在ambari中将xxx服务依次执行restart操作");
 			return;
 		}
 
 		//9.重启runner
-		System.out.println("restart bdos-runner ......");
+		System.out.println("restart xxx-runner ......");
 		if(cc.restartRunner(bpb))
-			System.out.println("restart bdos-runner 成功！");
+			System.out.println("restart xxx-runner 成功！");
 		else{
-			System.out.println("restart bdos-runner 失败，请查看日志信息/opt/bdos/bdos-ide-runner-server/logs/main.log");
+			System.out.println("restart xxx-runner 失败，请查看日志信息/opt/xxx/xxx-ide-runner-server/logs/main.log");
 			return;
 		}
 		
@@ -246,7 +246,7 @@ public class CreateCluster {
 		String master_02 = "";
 		String master_03 = "";
 		String master_01 = "";
-		String bdos_web = "";
+		String xxx_web = "";
 
 
 		if(hosts != null && hosts.length() > 0){
@@ -255,14 +255,14 @@ public class CreateCluster {
 			ct.setHost_groups(hostGroups);
 
 
-			HostGroup bdosWebGroup = new HostGroup();
-			bdosWebGroup.setName("bdos_web");
+			HostGroup xxxWebGroup = new HostGroup();
+			xxxWebGroup.setName("xxx_web");
 
-			HostGroup bdosRunnerGroup = new HostGroup();
-			bdosRunnerGroup.setName("bdos_runner");
+			HostGroup xxxRunnerGroup = new HostGroup();
+			xxxRunnerGroup.setName("xxx_runner");
 
-			//			HostGroup bdosClusterThrift = new HostGroup();
-			//			bdosClusterThrift.setName("bdos_cluster_thrift");
+			//			HostGroup xxxClusterThrift = new HostGroup();
+			//			xxxClusterThrift.setName("xxx_cluster_thrift");
 
 			HostGroup clusterMaster_1 = new HostGroup();
 			clusterMaster_1.setName("cluster_master_1");
@@ -290,9 +290,9 @@ public class CreateCluster {
 				isStormNeeded = true;
 			}
 
-			hostGroups.add(bdosWebGroup);
-			hostGroups.add(bdosRunnerGroup);
-			//			hostGroups.add(bdosClusterThrift);
+			hostGroups.add(xxxWebGroup);
+			hostGroups.add(xxxRunnerGroup);
+			//			hostGroups.add(xxxClusterThrift);
 			hostGroups.add(clusterMaster_1);
 			hostGroups.add(clusterMaster_2);
 			hostGroups.add(clusterMaster_3);
@@ -310,21 +310,21 @@ public class CreateCluster {
 
 				HostFqdn fqdn = new HostFqdn(hostname);
 
-				if(hostname.contains("bdos-runner")){
-					bdos_runner_hosts.add(hostname);
-					bdosRunnerGroup.getHosts().add(fqdn);
-					//					bdosRunnerGroup.getHosts().add(new HostFqdn("bgs-5p249-gaojun"));
-					//				}else if(hostname.contains("bdos-cluster-thrift")){
+				if(hostname.contains("xxx-runner")){
+					xxx_runner_hosts.add(hostname);
+					xxxRunnerGroup.getHosts().add(fqdn);
+					//					xxxRunnerGroup.getHosts().add(new HostFqdn("bgs-5p249-gaojun"));
+					//				}else if(hostname.contains("xxx-cluster-thrift")){
 					//					
-					//					bdosClusterThrift.getHosts().add(fqdn);
-				}else if(hostname.contains("bdos-web")){
-					bdos_web = hostname;
-					bdos_web_host = bdos_web;
-					bdosWebGroup.getHosts().add(fqdn);
-					//					bdosWebGroup.getHosts().add(new HostFqdn("bgs-5p248-gaojun"));
-					//				}else if(hostname.contains("bdos-cluster-thrift")){
+					//					xxxClusterThrift.getHosts().add(fqdn);
+				}else if(hostname.contains("xxx-web")){
+					xxx_web = hostname;
+					xxx_web_host = xxx_web;
+					xxxWebGroup.getHosts().add(fqdn);
+					//					xxxWebGroup.getHosts().add(new HostFqdn("bgs-5p248-gaojun"));
+					//				}else if(hostname.contains("xxx-cluster-thrift")){
 					//					
-					//					bdosClusterThrift.getHosts().add(fqdn);
+					//					xxxClusterThrift.getHosts().add(fqdn);
 				}else if(hostname.contains("cluster-master-1")){
 					master_01 = hostname;
 					clusterMaster_1.getHosts().add(fqdn);
@@ -406,13 +406,13 @@ public class CreateCluster {
 		//hive-site
 		Map<String, Object> hiveSiteMap = new HashedMap();
 		confMap.put("hive-site", hiveSiteMap);
-		hiveSiteMap.put("javax.jdo.option.ConnectionURL", "jdbc:mysql://"+bdos_web+":3306/hive?createDatabaseIfNotExist=true&characterEncoding=UTF-8");
+		hiveSiteMap.put("javax.jdo.option.ConnectionURL", "jdbc:mysql://"+xxx_web+":3306/hive?createDatabaseIfNotExist=true&characterEncoding=UTF-8");
 		hiveSiteMap.put("javax.jdo.option.ConnectionPassword", bpb.getMysqlRootPass());
 
 		//nginx-server-env
 		Map<String, Object> nginxMap = new HashedMap();
 		confMap.put("nginx-server-env", nginxMap);
-		nginxMap.put("nginx_domain", "azure.bdos.com");
+		nginxMap.put("nginx_domain", "azure.xxx.com");
 
 		//mysql-master
 		Map<String, Object> mysqlMap = new HashedMap();
@@ -455,7 +455,7 @@ public class CreateCluster {
 			List<Repository> repoList = JSONArray.toList(repoArray, Repository.class);
 			if(repoList != null && repoList.size() > 0){
 				for(Repository repo : repoList){
-					if(repo.getVersion() != null && repo.getVersion().toUpperCase().equals(bpb.getBdosVersion().substring(0, 18).toUpperCase())){
+					if(repo.getVersion() != null && repo.getVersion().toUpperCase().equals(bpb.getXxxVersion().substring(0, 18).toUpperCase())){
 						StringBuilder sb_hdp = new StringBuilder();
 						sb_hdp.append("{\"Repositories\":{\"base_url\":\"")
 						.append(bpb.getRepoAddress())
@@ -527,8 +527,8 @@ public class CreateCluster {
 
 	//执行MYSQL Init 并重启 BD-OS
 	private boolean initMysql(BluePrintBuild bpb){
-		String initMysqlJson = "{\"RequestInfo\":{\"context\":\"Execute initialize\",\"command\":\"initialize\"},\"Requests/resource_filters\":[{\"service_name\":\"MYSQL\",\"component_name\":\"mysql_master\",\"hosts\":\"bdos-web\"}]}";
-		initMysqlJson.replaceAll("bdos-web", bdos_web_host);
+		String initMysqlJson = "{\"RequestInfo\":{\"context\":\"Execute initialize\",\"command\":\"initialize\"},\"Requests/resource_filters\":[{\"service_name\":\"MYSQL\",\"component_name\":\"mysql_master\",\"hosts\":\"xxx-web\"}]}";
+		initMysqlJson.replaceAll("xxx-web", xxx_web_host);
 		CreateCluster cc = new CreateCluster();
 
 		String url = bpb.getAmbariServerAddress()+"/api/v1/clusters/mycluster/requests";
@@ -549,10 +549,10 @@ public class CreateCluster {
 
 
 	//重启BD-OS的所有服务
-	private boolean restartBdosServers(BluePrintBuild bpb){
+	private boolean restartxxxServers(BluePrintBuild bpb){
 
-		String restartJson = "{\"RequestInfo\":{\"command\":\"RESTART\",\"context\":\"Restart all components on bdos-web\",\"operation_level\":{\"level\":\"HOST\",\"cluster_name\":\"mycluster\"}},\"Requests/resource_filters\":[{\"service_name\":\"BDOS_AEGIS\",\"component_name\":\"BDOS_AEGIS_SERVER\",\"hosts\":\"bdos-web\"},{\"service_name\":\"BDOS_CAS\",\"component_name\":\"BDOS_CAS_SERVER\",\"hosts\":\"bdos-web\"},{\"service_name\":\"BDOS_DATAAUDIT\",\"component_name\":\"BDOS_DATAAUDIT\",\"hosts\":\"bdos-web\"},{\"service_name\":\"BDOS_DATAMANAGER\",\"component_name\":\"BDOS_DATAMANAGER\",\"hosts\":\"bdos-web\"},{\"service_name\":\"BDOS_DESKTOP\",\"component_name\":\"BDOS_DESKTOP_SERVER\",\"hosts\":\"bdos-web\"},{\"service_name\":\"BDOS_EUROPA\",\"component_name\":\"BDOS_EUROPA\",\"hosts\":\"bdos-web\"},{\"service_name\":\"BDOS_LOGAUDIT\",\"component_name\":\"BDOS_LOGAUDIT\",\"hosts\":\"bdos-web\"},{\"service_name\":\"BDOS_PROJECT\",\"component_name\":\"BDOS_PROJECT\",\"hosts\":\"bdos-web\"},{\"service_name\":\"BDOS_LICENSE\",\"component_name\":\"BDOS_LICENSE_SERVER\",\"hosts\":\"bdos-web\"}]}";
-		restartJson.replaceAll("bdos-web", bdos_web_host);
+		String restartJson = "{\"RequestInfo\":{\"command\":\"RESTART\",\"context\":\"Restart all components on xxx-web\",\"operation_level\":{\"level\":\"HOST\",\"cluster_name\":\"mycluster\"}},\"Requests/resource_filters\":[{\"service_name\":\"xxx_AEGIS\",\"component_name\":\"xxx_AEGIS_SERVER\",\"hosts\":\"xxx-web\"},{\"service_name\":\"xxx_CAS\",\"component_name\":\"xxx_CAS_SERVER\",\"hosts\":\"xxx-web\"},{\"service_name\":\"xxx_DATAAUDIT\",\"component_name\":\"xxx_DATAAUDIT\",\"hosts\":\"xxx-web\"},{\"service_name\":\"xxx_DATAMANAGER\",\"component_name\":\"xxx_DATAMANAGER\",\"hosts\":\"xxx-web\"},{\"service_name\":\"xxx_DESKTOP\",\"component_name\":\"xxx_DESKTOP_SERVER\",\"hosts\":\"xxx-web\"},{\"service_name\":\"xxx_EUROPA\",\"component_name\":\"xxx_EUROPA\",\"hosts\":\"xxx-web\"},{\"service_name\":\"xxx_LOGAUDIT\",\"component_name\":\"xxx_LOGAUDIT\",\"hosts\":\"xxx-web\"},{\"service_name\":\"xxx_PROJECT\",\"component_name\":\"xxx_PROJECT\",\"hosts\":\"xxx-web\"},{\"service_name\":\"xxx_LICENSE\",\"component_name\":\"xxx_LICENSE_SERVER\",\"hosts\":\"xxx-web\"}]}";
+		restartJson.replaceAll("xxx-web", xxx_web_host);
 		CreateCluster cc = new CreateCluster();
 
 		String url = bpb.getAmbariServerAddress()+"/api/v1/clusters/mycluster/requests";
@@ -574,10 +574,10 @@ public class CreateCluster {
 	//重启runner
 	private boolean restartRunner(BluePrintBuild bpb){
 
-		String restartJson = "{\"RequestInfo\":{\"context\":\"restart runner\",\"command\":\"RESTART\"},\"Requests/resource_filters\":[{\"service_name\":\"BDOS_IDE_RUNNER\",\"component_name\":\"BDOS_IDE_RUNNER_SERVER\",\"hosts\":\"bdos-runner-01\"}]}";
+		String restartJson = "{\"RequestInfo\":{\"context\":\"restart runner\",\"command\":\"RESTART\"},\"Requests/resource_filters\":[{\"service_name\":\"xxx_IDE_RUNNER\",\"component_name\":\"xxx_IDE_RUNNER_SERVER\",\"hosts\":\"xxx-runner-01\"}]}";
 		CreateCluster cc = new CreateCluster();
-		for(String runner_host : bdos_runner_hosts){
-			String restartJson_tmp = restartJson.replaceAll("bdos-runner-01", runner_host);
+		for(String runner_host : xxx_runner_hosts){
+			String restartJson_tmp = restartJson.replaceAll("xxx-runner-01", runner_host);
 			String url = bpb.getAmbariServerAddress()+"/api/v1/clusters/mycluster/requests";
 			try {
 				Map<String,String> repMap = HttpClientTools.sendPost(url, restartJson_tmp, "admin:admin");

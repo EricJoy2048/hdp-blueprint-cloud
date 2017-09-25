@@ -1,8 +1,8 @@
-package com.bfd.bdos.bdos.cloud.ambari.blueprint;
+package com.cloud.ambari.blueprint;
 
 public class BluePrintBuild {
 	
-	private String bdosVersion;
+	private String xxxVersion;
 	
 	private String blueprintName;
 	
@@ -24,17 +24,17 @@ public class BluePrintBuild {
 	
 	
 	
-	public BluePrintBuild(String bdosVersion 
+	public BluePrintBuild(String xxxVersion 
 			, String ambariServerAddress 
 			, String clusterName 
 			, String repoAddress 
 			, String repoFile
 			, String mysqlRootPass){
 		
-		this.bdosVersion = bdosVersion;
+		this.xxxVersion = xxxVersion;
 		this.clusterName = clusterName;
 		this.ambariServerAddress = ambariServerAddress;
-		this.blueprintName = (this.bdosVersion + "-blueprint").toLowerCase();
+		this.blueprintName = (this.xxxVersion + "-blueprint").toLowerCase();
 		this.blueprintFileName = this.blueprintName + ".json";
 		this.blueprintRegistAddress = this.ambariServerAddress + "/api/v1/blueprints/" + this.blueprintName.toLowerCase();
 		this.createClusterAddress = this.ambariServerAddress + "/api/v1/clusters/" + this.clusterName;
@@ -44,14 +44,23 @@ public class BluePrintBuild {
 	}
 
 
-	public String getBdosVersion() {
-		return bdosVersion;
+
+
+
+	public String getXxxVersion() {
+		return xxxVersion;
 	}
 
 
-	public void setBdosVersion(String bdosVersion) {
-		this.bdosVersion = bdosVersion;
+
+
+
+	public void setXxxVersion(String xxxVersion) {
+		this.xxxVersion = xxxVersion;
 	}
+
+
+
 
 
 	public String getBlueprintName() {

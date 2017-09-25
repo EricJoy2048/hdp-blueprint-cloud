@@ -1,11 +1,11 @@
-package com.bfd.bdos.bdos.cloud;
+package com.cloud;
 
 import static org.junit.Assert.*;
 import net.sf.json.JSONObject;
 
 import org.junit.Test;
 
-import com.bfd.bdos.bdos.cloud.ambari.blueprint.bean.MonitorProgress;
+import com.cloud.ambari.blueprint.bean.MonitorProgress;
 
 public class testJsonToBean {
 

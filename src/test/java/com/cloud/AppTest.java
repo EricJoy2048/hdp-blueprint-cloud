@@ -1,4 +1,4 @@
-package com.bfd.bdos.bdos.cloud;
+package com.cloud;
 
 import junit.framework.Test;
 import junit.framework.TestCase;

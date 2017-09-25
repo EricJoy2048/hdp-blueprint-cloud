@@ -1,22 +1,18 @@
 [
     {
-        "version": "BDOS1.3.0-HDP2.4.2",
+        "version": "XXX1.3.0-HDP2.4.2",
         "ambarirepo": "/ambari/AMBARI-2.4.1.0/centos6/2.4.1.0-22/",
         "hdputils": "/ambari/HDP-UTILS-1.1.0.20/repos/centos6/",
         "hdp": "/ambari/HDP/centos6/2.x/updates/2.4.2.0/",
-        "khan": "/ambari/khan",
-        "bdos": "/ambari/BDOS-1.3.0/",
         "hrefhdp": "/api/v1/stacks/HDP/versions/2.4/operating_systems/redhat6/repositories/HDP-2.4",
         "hrefhdputils": "/api/v1/stacks/HDP/versions/2.4/operating_systems/redhat6/repositories/HDP-UTILS-1.1.0.20"
 
     },
     {
-        "version": "BDOS1.3.1-HDP2.4.2",
+        "version": "BXXX1.3.1-HDP2.4.2",
         "ambarirepo": "/ambari/AMBARI-2.4.1.0/centos6/2.4.1.0-22/",
         "hdputils": "/ambari/HDP-UTILS-1.1.0.20/repos/centos6/",
         "hdp": "/ambari/HDP/centos6/2.x/updates/2.4.2.0/",
-        "khan": "/ambari/khan",
-        "bdos": "/ambari/BDOS-1.3.0/",
         "hrefhdp": "/api/v1/stacks/HDP/versions/2.4/operating_systems/redhat6/repositories/HDP-2.4",
         "hrefhdputils": "/api/v1/stacks/HDP/versions/2.4/operating_systems/redhat6/repositories/HDP-UTILS-1.1.0.20"
 

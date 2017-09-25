@@ -1,4 +1,4 @@
-package com.bfd.bdos.bdos.cloud.ambari.blueprint.bean;
+package com.cloud.ambari.blueprint.bean;
 
  /**
  * 主机对象模板
