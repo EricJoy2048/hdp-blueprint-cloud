@@ -1,0 +1,84 @@
+{
+  "blueprint": "bdos1.3.1-hdp2.4.2-blueprint",
+  "default_password": "admin",
+  "config_recommendation_strategy": "ALWAYS_APPLY_DONT_OVERRIDE_CUSTOM_VALUES",
+  "configurations": [
+    { 
+        "hawq-site" : {
+            "hawq_rm_yarn_address": "cluster-master-2:8050",
+            "hawq_rm_yarn_scheduler_address": "cluster-master-2:8030"
+        }
+    },
+    { 
+        "hdfs-client" : {
+            "dfs.namenode.http-address.mycluster.nn1": "cluster-master-1:50070",
+            "dfs.namenode.http-address.mycluster.nn2": "cluster-master-3:50070",
+            "dfs.namenode.rpc-address.mycluster.nn1": "cluster-master-1:8020",
+            "dfs.namenode.rpc-address.mycluster.nn2": "cluster-master-3:8020",
+            "dfs.nameservices": "mycluster",
+            "dfs.ha.namenodes.mycluster": "nn1,nn2"
+        }
+    },
+    { 
+        "yarn-client" : {
+            "yarn.resourcemanager.ha": "cluster-master-2:8032,cluster-master-3:8032",
+            "yarn.resourcemanager.scheduler.ha": "cluster-master-2:8030,cluster-master-3:8030"
+        }
+    },
+    { 
+        "nginx-server-env" : {
+            "nginx_domain": "azure.bdos.com"
+        }
+    }
+  ],
+  "host_groups": [
+    { 
+        "name": "bdos_runner",
+        "hosts": [
+            { "fqdn": "bdos-runner-1" }
+        ]
+    },
+    { 
+        "name": "bdos_web",
+        "hosts": [
+            { "fqdn": "bdos-web" }
+        ]
+    },
+    { 
+        "name": "cluster_master_1",
+        "hosts": [
+            { "fqdn": "cluster-master-1" }
+        ]
+    },
+    { 
+        "name": "cluster_master_2",
+        "hosts": [
+            { "fqdn": "cluster-master-2" }
+        ]
+    },
+    { 
+        "name": "cluster_master_3",
+        "hosts": [
+            { "fqdn": "cluster-master-3" }
+        ]
+    },
+    { 
+        "name": "cluster_slave",
+        "hosts": [
+            { "fqdn": "cluster-slave-1" }
+        ]
+    },
+    { 
+        "name": "kafka",
+        "hosts": [
+            { "fqdn": "cluster-kafka-1" }
+        ]
+    },
+    { 
+        "name": "storm",
+        "hosts": [
+            { "fqdn": "cluster-storm-1" }
+        ]
+    }
+  ]
+}

@@ -1,0 +1,387 @@
+{
+  "Blueprints": {
+    "stack_name": "HDP",
+    "stack_version": "2.4"
+  },
+  "host_groups": [
+    {
+      "name": "bdos_runner",
+      "cardinality": "1+",
+      "components": [
+        {
+          "name": "METRICS_MONITOR"
+        },
+        {
+          "name": "LOGSEARCH_LOGFEEDER"
+        },
+        {
+          "name": "BDOS_IDE_RUNNER_SERVER"
+        },
+        {
+          "name": "TEZ_CLIENT"
+        },
+        {
+          "name": "PIG"
+        },
+        {
+          "name": "redis_slave"
+        },
+        {
+          "name": "FLUME_HANDLER"
+        },
+        {
+          "name": "HBASE_CLIENT"
+        }
+      ]
+    },
+    {
+      "name": "bdos_web",
+      "cardinality": "1",
+      "components": [
+        {
+          "name": "METRICS_COLLECTOR"
+        },
+        {
+          "name": "METRICS_MONITOR"
+        },
+        {
+          "name": "METRICS_GRAFANA"
+        },
+        {
+          "name": "LOGSEARCH_LOGFEEDER"
+        },
+        {
+          "name": "INFRA_SOLR"
+        },
+        {
+          "name": "BDOS_AEGIS_SERVER"
+        },
+        {
+          "name": "BDOS_CAS_SERVER"
+        },
+        {
+          "name": "BDOS_DATAAUDIT"
+        },
+        {
+          "name": "BDOS_DATAMANAGER"
+        },
+        {
+          "name": "BDOS_DESKTOP_SERVER"
+        },
+        {
+          "name": "BDOS_EUROPA"
+        },
+        {
+          "name": "BDOS_LICENSE_SERVER"
+        },
+        {
+          "name": "BDOS_LOGAUDIT"
+        },
+        {
+          "name": "BDOS_PROJECT"
+        },
+        {
+          "name": "LOGSEARCH_SERVER"
+        },
+        {
+          "name": "mysql_master"
+        },
+        {
+          "name": "NGINX"
+        },
+        {
+          "name": "KHAN_RANGER"
+        }  
+        
+      ]
+    },
+    {
+      "name": "cluster_master_1",
+      "cardinality": "1",
+      "components": [
+        {
+          "name": "METRICS_MONITOR"
+        },
+        {
+          "name": "LOGSEARCH_LOGFEEDER"
+        },
+        {
+          "name": "HISTORYSERVER"
+        },
+        {
+          "name": "SPARK_JOBHISTORYSERVER"
+        },
+        {
+          "name": "JOURNALNODE"
+        },
+        {
+          "name": "NAMENODE"
+        },
+        {
+          "name": "ZKFC"
+        },
+        {
+          "name": "ZOOKEEPER_SERVER"
+        },
+        {
+          "name": "HIVE_METASTORE"
+        },
+        {
+          "name": "HIVE_SERVER"
+        },
+        {
+          "name": "HBASE_MASTER"
+        },
+        {
+          "name": "STORM_UI_SERVER"
+        } 
+      ]
+    },
+    {
+      "name": "cluster_master_2",
+      "cardinality": "1",
+      "components": [
+        {
+          "name": "METRICS_MONITOR"
+        },
+        {
+          "name": "LOGSEARCH_LOGFEEDER"
+        },
+        {
+          "name": "APP_TIMELINE_SERVER"
+        },
+        {
+          "name": "JOURNALNODE"
+        },
+        {
+          "name": "redis_sentinel"
+        },
+        {
+          "name": "redis_master"
+        },
+        {
+          "name": "WEBHCAT_SERVER"
+        },
+        {
+          "name": "SQOOP_METASTORE"
+        },
+        {
+          "name": "RESOURCEMANAGER"
+        },
+        {
+          "name": "DRPC_SERVER"
+        },
+        {
+          "name": "HAWQMASTER"
+        },
+        {
+          "name": "ZOOKEEPER_SERVER"
+        }
+      ]
+    },
+    {
+      "name": "cluster_master_3",
+      "cardinality": "1",
+      "components": [
+        {
+          "name": "METRICS_MONITOR"
+        },
+        {
+          "name": "LOGSEARCH_LOGFEEDER"
+        },
+        {
+          "name": "JOURNALNODE"
+        },
+        {
+          "name": "RESOURCEMANAGER"
+        },
+        {
+          "name": "NAMENODE"
+        },
+        {
+          "name": "ZKFC"
+        },
+        {
+          "name": "HAWQSTANDBY"
+        },
+        {
+          "name": "ZOOKEEPER_SERVER"
+        },
+        {
+           "name": "NIMBUS"
+        },
+        {
+          "name": "KHAN_PLE_SERVER"
+        }
+      ]
+    },
+    {
+      "name": "slave",
+      "cardinality": "1+",
+      "components": [
+        {
+          "name": "METRICS_MONITOR"
+        },
+        {
+          "name": "LOGSEARCH_LOGFEEDER"
+        },
+        {
+          "name": "DATANODE"
+        },
+        {
+          "name": "HAWQSEGMENT"
+        },
+        {
+          "name": "NODEMANAGER"
+        },
+        {
+          "name": "HBASE_REGIONSERVER"
+        }
+      ]
+    },
+    {
+      "name": "cluster_kafka_1",
+      "cardinality": "0+",
+      "components": [
+        {
+          "name": "KAFKA_BROKER"
+        },
+        {
+          "name": "METRICS_MONITOR"
+        },
+        {
+          "name": "LOGSEARCH_LOGFEEDER"
+        }
+      ]
+    },
+    {
+      "name": "cluster_storm_1",
+      "cardinality": "0+",
+      "components": [
+        {
+          "name": "SUPERVISOR"
+        },
+        {
+          "name": "METRICS_MONITOR"
+        },
+        {
+          "name": "LOGSEARCH_LOGFEEDER"
+        }
+      ]
+    }
+  ],
+  "configurations": [
+    {
+      "core-site": {
+        "properties": {
+          "fs.defaultFS": "hdfs://mycluster",
+          "ha.zookeeper.quorum": "%HOSTGROUP::cluster_master_1%:2181,%HOSTGROUP::cluster_master_2%:2181,%HOSTGROUP::cluster_master_3%:2181",
+          "hadoop.proxyuser.ambari.groups": "*",
+          "hadoop.proxyuser.ambari.hosts": "*"
+        }
+      }
+    },
+    {
+      "hdfs-site": {
+        "properties": {
+          "dfs.client.failover.proxy.provider.mycluster": "org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider",
+          "dfs.ha.automatic-failover.enabled": "true",
+          "dfs.internal.nameservices": "mycluster",
+          "dfs.ha.fencing.methods": "shell(/bin/true)",
+          "dfs.ha.namenodes.mycluster": "nn1,nn2",
+          "dfs.namenode.http-address": "%HOSTGROUP::cluster_master_1%:50070",
+          "dfs.namenode.http-address.mycluster.nn1": "%HOSTGROUP::cluster_master_1%:50070",
+          "dfs.namenode.http-address.mycluster.nn2": "%HOSTGROUP::cluster_master_3%:50070",
+          "dfs.namenode.https-address": "%HOSTGROUP::cluster_master_1%:50470",
+          "dfs.namenode.https-address.mycluster.nn1": "%HOSTGROUP::cluster_master_1%:50470",
+          "dfs.namenode.https-address.mycluster.nn2": "%HOSTGROUP::cluster_master_3%:50470",
+          "dfs.namenode.rpc-address.mycluster.nn1": "%HOSTGROUP::cluster_master_1%:8020",
+          "dfs.namenode.rpc-address.mycluster.nn2": "%HOSTGROUP::cluster_master_3%:8020",
+          "dfs.namenode.shared.edits.dir": "qjournal://%HOSTGROUP::cluster_master_1%:8485;%HOSTGROUP::cluster_master_2%:8485;%HOSTGROUP::cluster_master_3%:8485/mycluster",
+          "dfs.nameservices": "mycluster",
+          "dfs.allow.truncate": "true",
+          "dfs.namenode.name.dir":"/opt/hadoop/hdfs/namenode",
+          "dfs.datanode.data.dir":"/data1/hadoop/hdfs/data,/data2/hadoop/hdfs/data,/data3/hadoop/hdfs/data,/data4/hadoop/hdfs/data,/data5/hadoop/hdfs/data",
+          "dfs.journalnode.edits.dir":"/opt/journal"
+         
+          
+        }
+      }
+    },
+    {
+      "yarn-site": {
+        "properties": {
+          "hadoop.registry.rm.enabled": "false",
+          "hadoop.registry.zk.quorum": "%HOSTGROUP::cluster_master_3%:2181,%HOSTGROUP::cluster_master_2%:2181,%HOSTGROUP::cluster_master_1%:2181",
+          "yarn.log.server.url": "http://%HOSTGROUP::cluster_master_2%:19888/jobhistory/logs",
+          "yarn.resourcemanager.zk-address":"%HOSTGROUP::cluster_master_1%:2181,%HOSTGROUP::cluster_master_2%:2181,%HOSTGROUP::cluster_master_3%:2181",
+          "yarn.resourcemanager.address": "%HOSTGROUP::cluster_master_2%:8050",
+          "yarn.resourcemanager.admin.address": "%HOSTGROUP::cluster_master_2%:8141",
+          "yarn.resourcemanager.cluster-id": "yarn-cluster",
+          "yarn.resourcemanager.ha.automatic-failover.zk-base-path": "/yarn-leader-election",
+          "yarn.resourcemanager.ha.enabled": "true",
+          "yarn.resourcemanager.ha.rm-ids": "rm1,rm2",
+          "yarn.resourcemanager.hostname": "%HOSTGROUP::cluster_master_2%",
+          "yarn.resourcemanager.hostname.rm1" : "%HOSTGROUP::cluster_master_2%",
+          "yarn.resourcemanager.hostname.rm2" : "%HOSTGROUP::cluster_master_3%",
+          "yarn.resourcemanager.recovery.enabled": "true",
+          "yarn.resourcemanager.resource-tracker.address": "%HOSTGROUP::cluster_master_2%:8025",
+          "yarn.resourcemanager.scheduler.address": "%HOSTGROUP::cluster_master_2%:8030",
+          "yarn.resourcemanager.store.class": "org.apache.hadoop.yarn.server.resourcemanager.recovery.ZKRMStateStore",
+          "yarn.resourcemanager.webapp.address": "%HOSTGROUP::cluster_master_2%:8088",
+          "yarn.resourcemanager.webapp.address.rm1": "%HOSTGROUP::cluster_master_2%:8088",
+          "yarn.resourcemanager.webapp.address.rm2": "%HOSTGROUP::cluster_master_3%:8088",
+          "yarn.resourcemanager.webapp.https.address": "%HOSTGROUP::cluster_master_2%:8090",
+          "yarn.resourcemanager.webapp.https.address.rm1": "%HOSTGROUP::cluster_master_2%:8090",
+          "yarn.resourcemanager.webapp.https.address.rm2": "%HOSTGROUP::cluster_master_3%:8090",
+          "yarn.timeline-service.address": "%HOSTGROUP::cluster_master_2%:10200",
+          "yarn.timeline-service.webapp.address": "%HOSTGROUP::cluster_master_2%:8188",
+          "yarn.timeline-service.webapp.https.address": "%HOSTGROUP::cluster_master_2%:8190",
+          "yarn.nodemanager.local-dirs":"/data1/hadoop/yarn/local,/data2/hadoop/yarn/local,/data3/hadoop/yarn/local,/data4/hadoop/yarn/local,/data5/hadoop/yarn/local",
+          "yarn.nodemanager.log-dirs":"/data1/hadoop/yarn/log,/data2/hadoop/yarn/log,/data3/hadoop/yarn/log,/data4/hadoop/yarn/log,/data5/hadoop/yarn/log"
+        }
+      }
+    },
+    {
+      "hawq-site": {
+        "properties": {
+          "hawq_dfs_url": "mycluster/hawq_data",
+          "hawq_master_directory":"/opt/hawq/master",
+          "hawq_segment_directory":"/opt/hawq/segment",
+          "hawq_master_temp_directory":"/data1/hawq/tmp/master,/data2/hawq/tmp/master,/data3/hawq/tmp/master,/data4/hawq/tmp/master,/data5/hawq/tmp/master",
+          "hawq_segment_temp_directory":"/data1/hawq/tmp/segment,/data2/hawq/tmp/segment,/data3/hawq/tmp/segment,/data4/hawq/tmp/segment,/data5/hawq/tmp/segment"
+        }
+      }
+    },
+    {
+      "hive-env": {
+        "properties": {
+          "hive_database": "Existing MySQL / MariaDB Database"
+        }
+      }
+    },
+    {
+      "hive-site": {
+        "properties": {
+          "ambari.hive.db.schema.name": "hive",
+          "javax.jdo.option.ConnectionUserName": "root",
+          "hive.execution.engine": "mr"
+        }
+      }
+    },
+    {
+      "mysql-master": {
+        "properties": {
+          "mysql_username": "root"
+        }
+      }
+    },
+    {
+      "zoo.cfg": {
+        "properties": {
+          "dataDir": "/opt/zookeeperdir"
+        }
+      }
+    }
+  ]
+}
